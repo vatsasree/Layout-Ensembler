@@ -1,0 +1,140 @@
+# ============================================================================
+# Layout Ensembler — Example Configuration
+# ============================================================================
+# This file demonstrates the full configuration schema. Copy and adapt it
+# for your own dataset and model setup.
+
+# ── Paths ──────────────────────────────────────────────────────────────────
+input_base_path: /data/documents
+ocr_results_sub_path: ocr
+layout_results_sub_path: layouts
+text_attributes_sub_path: text_attributes
+
+# ── Model identifiers ─────────────────────────────────────────────────────
+table_model_name: ""
+generic_model_name: ""
+
+# ── Label mappings ─────────────────────────────────────────────────────────
+# Map detector-native labels → unified taxonomy (see RegionType enum)
+surya_to_unified_map:
+  Caption: caption
+  Footnote: footnote
+  Formula: formula
+  ListItem: list-item
+  PageFooter: footer
+  PageHeader: header
+  Picture: picture
+  SectionHeader: section-title
+  Table: table
+  Text: paragraph
+  Title: title
+  Page-number: page-number
+  TextInlineMath: text-inline-math
+  Code: code
+  Form: form
+  Handwriting: handwriting
+
+yolo_to_unified_map:
+  paragraph: paragraph
+  header: header
+  figure: figure
+  table: table
+  caption: caption
+  formula: formula
+  list: ordered-list
+  title: title
+  footer: footer
+  page-number: page-number
+  signature: signature
+  handwriting: handwriting
+  picture: picture
+
+direct_add_labels:
+  - signature
+  - handwriting
+
+multi_prompt_map: {}
+
+# ── Visualization colors (BGR) ────────────────────────────────────────────
+unified_label_viz:
+  paragraph: [70, 180, 120]
+  header: [220, 100, 60]
+  footer: [200, 130, 80]
+  title: [50, 100, 220]
+  section-title: [80, 130, 200]
+  table: [180, 60, 180]
+  figure: [60, 180, 180]
+  picture: [60, 180, 180]
+  caption: [180, 180, 60]
+  formula: [140, 80, 200]
+  list-item: [100, 200, 100]
+  page-number: [160, 160, 160]
+  footnote: [130, 130, 200]
+  signature: [200, 60, 60]
+  handwriting: [200, 120, 60]
+
+# ── YOLO detector weights ─────────────────────────────────────────────────
+# List paths to each YOLO checkpoint. Each gets its own GPU.
+yolo_model_paths:
+  # - /path/to/yolov11x_best.pt
+  # - /path/to/IndicDLP.pt
+  # - /path/to/Signature_detection.pt
+  []
+
+# ── Device mapping ────────────────────────────────────────────────────────
+# Assign GPU IDs to each model family
+device_map:
+  surya: [0, 1]     # Surya replicas on GPU 0 and 1
+  yolo: [2, 3, 4]   # One YOLO checkpoint per GPU
+
+# ── Model toggles ─────────────────────────────────────────────────────────
+surya:
+  enabled: true
+
+yolo:
+  enabled: true
+
+# ── Numeric hyper-parameters ──────────────────────────────────────────────
+batch_size: 64
+box_padding: 10
+nms_iou_threshold: 0.5
+text_enclosure_threshold: 0.8
+indicdlp_add_iou_threshold: 0.3
+
+# ── Ensemble configuration ───────────────────────────────────────────────
+# This is the core of the project: how to merge detections from multiple
+# models into a single, high-quality layout output.
+ensemble_config:
+  # The base model provides the backbone — all its detections are accepted
+  base_model_name: surya
+
+  # Supplementary models are processed in this order
+  model_priority_order:
+    - surya
+    - yolov11x_best
+    - IndicDLP
+    - Signature_detection
+
+  # A supplementary detection is rejected if IoU with any accepted box ≥ this
+  iou_threshold: 0.1
+
+  # These classes are NEVER suppressed, even if they overlap
+  protected_classes_from_overlap_removal:
+    - signature
+    - handwriting
+
+  # Per-model confidence floors for supplementary models
+  conf_thresholds_for_supplementary_models:
+    IndicDLP: 0.4
+    Signature_detection: 0.3
+
+  # Per-model class allowlists — only these classes are kept from each model
+  filtered_classes_to_keep:
+    IndicDLP:
+      - paragraph
+      - table
+      - figure
+      - picture
+      - handwriting
+    Signature_detection:
+      - signature
