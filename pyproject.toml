@@ -1,0 +1,89 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "layout-ensembler"
+version = "0.1.0"
+description = "Multi-model ensemble framework for document layout detection — combines the strengths of Surya, YOLO, and IndicDLP detectors through class-aware priority NMS."
+readme = "README.md"
+license = {text = "MIT"}
+requires-python = ">=3.10"
+authors = [
+    {name = "Sreevatsa S"},
+]
+keywords = [
+    "document-layout-analysis",
+    "layout-detection",
+    "ensemble-learning",
+    "object-detection",
+    "document-understanding",
+    "computer-vision",
+    "surya",
+    "yolo",
+    "nms",
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Scientific/Engineering :: Image Recognition",
+]
+
+dependencies = [
+    "numpy>=1.24",
+    "opencv-python>=4.8",
+    "Pillow>=10.0",
+    "pydantic>=2.0",
+    "PyYAML>=6.0",
+    "tqdm>=4.65",
+]
+
+[project.optional-dependencies]
+surya = [
+    "surya-ocr>=0.6",
+]
+yolo = [
+    "ultralytics>=8.0",
+]
+entity = [
+    "ultralytics>=8.0",
+    "huggingface-hub>=0.20",
+]
+all = [
+    "layout-ensembler[surya,yolo,entity]",
+    "supervision>=0.18",
+    "torch>=2.0",
+]
+dev = [
+    "pytest>=7.0",
+    "pytest-cov>=4.0",
+    "ruff>=0.4",
+]
+
+[project.scripts]
+layout-ensemble = "layout_ensembler.drivers.run_layout_batch:main"
+layout-crop = "layout_ensembler.drivers.run_crop_batch:main"
+
+[project.urls]
+Repository = "https://github.com/sreevatsa-s/layout-ensembler"
+
+[tool.setuptools.packages.find]
+include = ["layout_ensembler*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-v --tb=short"
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "W"]
+ignore = ["E501"]
