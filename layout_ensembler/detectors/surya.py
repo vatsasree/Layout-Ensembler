@@ -101,7 +101,19 @@ class SuryaModel(BaseModel):
                 from surya.settings import settings
 
                 settings.DISABLE_TQDM = True
-                pred = LayoutPredictor(device=f"cuda:{gid}")
+                try:
+                    pred = LayoutPredictor(device=f"cuda:{gid}")
+                except TypeError:
+                    try:
+                        from surya.foundation import FoundationPredictor
+                        from surya.settings import settings
+                        foundation_pred = FoundationPredictor(
+                            checkpoint=settings.LAYOUT_MODEL_CHECKPOINT,
+                            device=f"cuda:{gid}"
+                        )
+                        pred = LayoutPredictor(foundation_pred)
+                    except ImportError:
+                        pred = LayoutPredictor()
                 self._replicas.append(pred)
                 log.info("  ✓ Surya replica on cuda:%d", gid)
             except Exception as e:

@@ -1,0 +1,17 @@
+[
+  {
+    "xyxy": [
+      595,
+      845,
+      1785,
+      2522
+    ],
+    "label": "picture",
+    "score": 0.8493446707725525,
+    "source": "surya",
+    "id": "b0fe42953053478693afdc98deb52f9a",
+    "parent_id": null,
+    "children_ids": [],
+    "payload": {}
+  }
+]

@@ -92,7 +92,7 @@ surya:
   enabled: true
 
 yolo:
-  enabled: true
+  enabled: false
 
 # ── Numeric hyper-parameters ──────────────────────────────────────────────
 batch_size: 64
